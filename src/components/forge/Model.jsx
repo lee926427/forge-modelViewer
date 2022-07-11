@@ -1,10 +1,10 @@
 import { useContext, useEffect } from "react";
 import { ForgeContext } from "./context";
-export default function Model({ urn }) {
+export default function Model({ ObjectId }) {
     const { pushUrnModel } = useContext(ForgeContext);
     useEffect(() => {
-        if (urn) pushUrnModel(urn);
-    }, [urn]);
+        if (ObjectId) pushUrnModel(ObjectId);
+    }, [ObjectId]);
 
     return null;
 }

@@ -1,15 +1,16 @@
 import { useRef, useEffect, useState } from "react";
 import { ForgeContext } from "./context";
 import { auth } from "../../services/forge";
-
-import "./extensions";
+import { encode } from "js-base64";
+import { toSafeBase64 } from "../../utils";
+// import "./extensions";
 
 import "forge-dataviz-iot-react-components/dist/main.bundle.css";
 
 function createViewer(targetRef, options) {
     return new Promise((resolve, reject) => {
         const viewer = new Autodesk.Viewing.GuiViewer3D(targetRef, {
-            extensions: ["MyAwesomeExtension"],
+            // extensions: ["MyAwesomeExtension"],
         });
         const stateCode = viewer.start(
             undefined,
@@ -24,34 +25,37 @@ function createViewer(targetRef, options) {
     });
 }
 
-async function loadModel(viewer, safeUrn) {
-    const { status, progress, derivatives } =
-        await translateFile.checkTranslationJob(safeUrn);
+async function loadModel(viewer, objectId) {
+    const base64 = encode(objectId);
+    const safeUrn = toSafeBase64(base64);
+    Autodesk.Viewing.Document.load(
+        "urn:" + safeUrn,
+        onDocumentLoadSuccess,
+        onDocumentLoadFailure
+    );
 
-    if (status === "failed") {
-        for (const messageItem of derivatives[0].messages) {
-            alert(messageItem.message);
-        }
-        return;
+    function onDocumentLoadSuccess(viewerDocument) {
+        const items = viewerDocument
+            .getRoot()
+            .search({ type: "geometry", role: "3d" }, true);
+        const url = viewerDocument.getViewablePath(items[0]);
+        viewer.loadModel(url, {
+            acmSessionId: viewerDocument.getAcmSessionId(url),
+        });
     }
 
-    // Autodesk.Viewing.Document.load(
-    //     'urn:' + safeUrn,
-    //     onDocumentLoadSuccess,
-    //     onDocumentLoadFailure
-    // );
-
-    // function onDocumentLoadSuccess(viewerDocument) {
-    //     const defaultModel = viewerDocument.getRoot().getDefaultGeometry(true);
-    //     viewer.loadDocumentNode(viewerDocument, defaultModel);
-    // }
-
-    // function onDocumentLoadFailure() {
-    //     console.error("Failed fetching Forge manifest");
-    // }
+    function onDocumentLoadFailure() {
+        console.error("Failed fetching Forge manifest");
+    }
 }
 
-export default function Viewer({ onModelLoaded, children }) {
+export default function Viewer({
+    clientId,
+    clientSecret,
+    scope,
+    onModelLoaded,
+    children,
+}) {
     const container = useRef(null);
     const forgeViewer = useRef(null);
     const DataVisualization = useRef(null);
@@ -75,12 +79,11 @@ export default function Viewer({ onModelLoaded, children }) {
             api: "streamingV2",
             getAccessToken: async (onTokenReady) => {
                 const { access_token, expires_in } =
-                    await auth.authClientTwoLegged("<CLIENT_SECRET>", [
-                        "data:write",
-                        "data:read",
-                        "bucket:create",
-                        "bucket:delete",
-                    ]);
+                    await auth.authClientTwoLegged(
+                        clientId,
+                        clientSecret,
+                        scope
+                    );
                 onTokenReady(access_token, expires_in);
             },
         };
@@ -100,7 +103,7 @@ export default function Viewer({ onModelLoaded, children }) {
 
             loadModel(
                 viewer,
-                "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dGVzdF9idWlsZGluZ3NfbW9kZWwvY2VudGVyXzIwMjEwMjE4LnJ2dA"
+                "urn:adsk.objects:os.object:test_buildings_model/center_20210218.rvt"
             );
         });
 

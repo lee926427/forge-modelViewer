@@ -1,0 +1,1 @@
+export const toSafeBase64 = (code) => code.match(/.+(?<!=)/)[0]

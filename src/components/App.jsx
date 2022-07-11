@@ -3,9 +3,18 @@ import { Viewer, UI, Model } from "./forge";
 function App() {
     return (
         <div className="App">
-            <Viewer>
+            <Viewer
+                clientId={import.meta.env.VITE_FORGE_CLIENT_ID}
+                clientSecret={import.meta.env.VITE_FORGE_CLIENT_SECRET}
+                scope={[
+                    "data:write",
+                    "data:read",
+                    "bucket:create",
+                    "bucket:delete",
+                ]}
+            >
                 <UI />
-                <Model urn="urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dGVzdF9idWlsZGluZ3NfbW9kZWwvJUU0JUI4JUFEJUU1JUE0JUFFXzIwMjEwMjE4LnJ2dA" />
+                <Model ObjectId="urn:adsk.objects:os.object:test_buildings_model/center_20210218.rvt" />
             </Viewer>
         </div>
     );
