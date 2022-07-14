@@ -9,6 +9,7 @@
     },
     "dependencies": {
         "axios": "^0.27.2",
+        "clsx": "^1.2.1",
         "forge-apis": "^0.9.0",
         "forge-dataviz-iot-data-modules": "^0.1.11",
         "forge-dataviz-iot-react-components": "^0.1.17",

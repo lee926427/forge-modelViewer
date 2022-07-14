@@ -103,7 +103,6 @@ export default function Viewer({
             );
 
             for (const model of urnModels) {
-                console.log("loading urmId:", model);
                 loadModel(viewerRef.current, model);
             }
 
@@ -141,7 +140,7 @@ export default function Viewer({
     );
 
     return (
-        <div ref={containerRef} className="w-screen h-screen">
+        <div ref={containerRef} className="w-full h-full">
             {isReady}
         </div>
     );

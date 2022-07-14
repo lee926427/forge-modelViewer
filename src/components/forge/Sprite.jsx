@@ -60,7 +60,7 @@ function Sprite({
         const viewables = viewableDataRef.current.viewables;
         const viewable = viewables.find((v) => v.dbId === event.dbId);
         if (viewable && Object.hasOwn(viewable, "series")) {
-            onClick(viewable.series.at(viewable._dbId));
+            onClick(viewable.series.at(viewable._dbId), event);
         }
         // dataVizExt.invalidateViewables([event.dbId], (viewable) => {
         //     return {
