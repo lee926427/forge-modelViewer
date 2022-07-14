@@ -82,7 +82,7 @@ function App() {
                         "z-[1]",
                         {
                             "translate-x-0": VisibleList,
-                            "translate-x-[400px]": !VisibleList,
+                            "translate-x-[460px]": !VisibleList,
                         }
                     )}
                 >
