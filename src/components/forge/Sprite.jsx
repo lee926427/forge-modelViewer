@@ -30,7 +30,7 @@ function Sprite({
             const viewable = new DataVizCore.SpriteViewable(
                 datum.position,
                 spriteStyle,
-                index
+                index + 1 //場景預設 dbId = 0,所以加1
             );
 
             viewable.series = data;
@@ -55,19 +55,38 @@ function Sprite({
      * @reference https://forge.autodesk.com/en/docs/dataviz/v1/developers_guide/examples/sprites/handling_sprite_events/#mouse-clicking-event
      */
 
-    function scaleSprite(event) {
+    function onSpriteClicked(event) {
         event.hasStopped = true;
-        const viewables = viewableDataRef.current.viewables;
-        const viewable = viewables.find((v) => v.dbId === event.dbId);
-        if (viewable && Object.hasOwn(viewable, "series")) {
-            onClick(viewable.series.at(viewable._dbId), event);
-        }
-        // dataVizExt.invalidateViewables([event.dbId], (viewable) => {
-        //     return {
-        //         scale: 1.0, // Restore the viewable size
-        //         url: "https://.../circle.svg",
-        //     };
-        // });
+
+        if (event.dbId === 0)
+            onClick({
+                dbId: event.dbId,
+                data: null,
+            });
+
+        dataVizExt.invalidateViewables([event.dbId], (viewable) => {
+            onClick({
+                dbId: event.dbId,
+                data: viewable.series.at(viewable._dbId - 1),
+            });
+            return {
+                ...viewable._style,
+                scale: 2,
+                color: { r: 1.0, g: 0.753, b: 0.796 },
+            };
+        });
+    }
+
+    function onSpriteClickedOut(event) {
+        event.hasStopped = true;
+        dataVizExt.invalidateViewables([event.dbId], (viewable) => {
+            console.log("click out", event);
+            return {
+                ...viewable._style,
+                scale: 1,
+                color: { r: 1.0, g: 1, b: 1 },
+            };
+        });
     }
 
     useEffect(() => {
@@ -78,10 +97,17 @@ function Sprite({
     }, [viewer, dataVizExt]);
 
     useEffect(() => {
-        viewer.addEventListener(DataVizCore.MOUSE_CLICK, scaleSprite);
+        viewer.addEventListener(DataVizCore.MOUSE_CLICK, onSpriteClicked);
+        viewer.addEventListener(
+            DataVizCore.MOUSE_CLICK_OUT,
+            onSpriteClickedOut
+        );
         viewer.addEventListener(DataVizCore.MOUSE_HOVERING, showSensorInfo);
         return () => {
-            viewer.removeEventListener(DataVizCore.MOUSE_CLICK, scaleSprite);
+            viewer.removeEventListener(
+                DataVizCore.MOUSE_CLICK,
+                onSpriteClicked
+            );
             viewer.removeEventListener(
                 DataVizCore.MOUSE_HOVERING,
                 showSensorInfo

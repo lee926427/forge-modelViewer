@@ -41,15 +41,14 @@ function App() {
     const [VisibleList, setVisibleList] = useState(false);
     const [deviceInfo, setDeviceInfo] = useState(null);
 
-    function onClickSensor(data, event) {
-        console.log(event);
-        console.log(VisibleList);
-        if (event.dbId === 0) {
+    function onClickSensor({ dbId, data }) {
+        console.log(dbId);
+        if (dbId === 0) {
             setVisibleList(false);
-            return;
+        } else {
+            setDeviceInfo(data);
+            setVisibleList(true);
         }
-        setDeviceInfo(data);
-        setVisibleList(true);
     }
 
     return (
@@ -78,7 +77,7 @@ function App() {
                     className={clsx(
                         "h-screen w-2/12",
                         "absolute right-0 top-0",
-                        "transition",
+                        "transition duration-300 ease-in-out",
                         "z-[1]",
                         {
                             "translate-x-0": VisibleList,
